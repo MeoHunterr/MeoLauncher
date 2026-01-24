@@ -8,6 +8,9 @@ import urllib.request
 import urllib.parse
 import subprocess
 import json
+import base64
+import zipfile
+import io
 import logging
 from pathlib import Path
 
@@ -179,6 +182,101 @@ class JSApi:
         
         logger.warning("Path validation failed for: %s", path)
         return {"status": "error", "message": "Path validation failed"}
+    
+    def get_screenshots(self):
+        base_dir = self.launcher.root_dir
+        screenshots_dir = os.path.join(base_dir, "screenshots")
+        os.makedirs(screenshots_dir, exist_ok=True)
+        
+        items = []
+        try:
+            for filename in os.listdir(screenshots_dir):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    filepath = os.path.join(screenshots_dir, filename)
+                    try:
+                        from PIL import Image
+                        with Image.open(filepath) as img:
+                            img.thumbnail((150, 150))
+                            buffer = io.BytesIO()
+                            img.save(buffer, format='PNG')
+                            thumbnail = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                        
+                        stat = os.stat(filepath)
+                        items.append({
+                            "filename": filename,
+                            "thumbnail": f"data:image/png;base64,{thumbnail}",
+                            "size": stat.st_size,
+                            "modified": stat.st_mtime
+                        })
+                    except (IOError, OSError) as e:
+                        logger.debug("Failed to process screenshot %s: %s", filename, e)
+        except (IOError, OSError) as e:
+            logger.debug("Failed to list screenshots: %s", e)
+        
+        return {"status": "success", "items": sorted(items, key=lambda x: x["modified"], reverse=True)}
+    
+    def get_texturepacks(self):
+        base_dir = self.launcher.root_dir
+        packs_dir = os.path.join(base_dir, "texturepacks")
+        os.makedirs(packs_dir, exist_ok=True)
+        
+        items = []
+        try:
+            for filename in os.listdir(packs_dir):
+                if filename.lower().endswith('.zip'):
+                    filepath = os.path.join(packs_dir, filename)
+                    thumbnail = None
+                    pack_name = os.path.splitext(filename)[0]
+                    
+                    try:
+                        with zipfile.ZipFile(filepath, 'r') as zf:
+                            if 'pack.png' in zf.namelist():
+                                with zf.open('pack.png') as img_file:
+                                    from PIL import Image
+                                    img = Image.open(img_file)
+                                    img.thumbnail((64, 64))
+                                    buffer = io.BytesIO()
+                                    img.save(buffer, format='PNG')
+                                    thumbnail = f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
+                    except (zipfile.BadZipFile, IOError, OSError) as e:
+                        logger.debug("Failed to read texturepack %s: %s", filename, e)
+                    
+                    stat = os.stat(filepath)
+                    items.append({
+                        "filename": filename,
+                        "name": pack_name,
+                        "thumbnail": thumbnail,
+                        "size": stat.st_size,
+                        "modified": stat.st_mtime
+                    })
+        except (IOError, OSError) as e:
+            logger.debug("Failed to list texturepacks: %s", e)
+        
+        return {"status": "success", "items": sorted(items, key=lambda x: x["name"].lower())}
+    
+    def delete_file(self, folder_type, filename):
+        if folder_type not in {"screenshots", "texturepacks"}:
+            return {"status": "error", "message": "Invalid folder type"}
+        
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return {"status": "error", "message": "Invalid filename"}
+        
+        base_dir = self.launcher.root_dir
+        folder_map = {"screenshots": "screenshots", "texturepacks": "texturepacks"}
+        folder_path = os.path.join(base_dir, folder_map[folder_type])
+        filepath = os.path.join(folder_path, filename)
+        
+        if not is_safe_path(filepath, folder_path):
+            return {"status": "error", "message": "Path validation failed"}
+        
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                return {"status": "success"}
+            return {"status": "error", "message": "File not found"}
+        except (IOError, OSError) as e:
+            logger.error("Failed to delete file: %s", e)
+            return {"status": "error", "message": str(e)}
     
     def pick_background_image(self):
         try:

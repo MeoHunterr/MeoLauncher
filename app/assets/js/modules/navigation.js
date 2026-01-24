@@ -7,6 +7,12 @@ function switchTab(tabName) {
     if (tabName === 'help') {
         switchHelpLanguage(currentLang === 'vi' ? 'vi' : 'en');
     }
+    if (tabName === 'screenshots' && typeof loadScreenshots === 'function') {
+        loadScreenshots();
+    }
+    if (tabName === 'texturepacks' && typeof loadTexturepacks === 'function') {
+        loadTexturepacks();
+    }
 }
 
 function switchHelpLanguage(lang) {
