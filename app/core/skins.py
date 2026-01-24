@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) -> bool:
-    """Validate URL scheme to prevent SSRF attacks."""
     try:
         parsed = urllib.parse.urlparse(url)
         return parsed.scheme.lower() in allowed_schemes
@@ -21,7 +20,6 @@ def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) ->
 
 
 def safe_urlopen(url: str, timeout: int = 10, headers: dict = None):
-    """Open URL only if scheme is allowed (http/https). Blocks file:// and other schemes."""
     if not validate_url_scheme(url):
         raise ValueError(f"URL scheme not allowed: {url}")
     
@@ -91,6 +89,21 @@ class SkinSystem:
                 self._save_cache_meta()
                 return True, cache_path
         
+        return False, None
+    
+    def download_skin_from_url(self, username: str, url: str) -> Tuple[bool, Optional[str]]:
+        username_lower = username.lower()
+        cache_path = os.path.join(self.cache_dir, f"{username_lower}.png")
+        dest_path = os.path.join(self.skins_dir, f"{username}.png")
+        
+        if self._download_file(url, cache_path):
+            self.cache_meta[username_lower] = {"timestamp": time.time(), "url": url, "source": "microsoft"}
+            self._save_cache_meta()
+            try:
+                shutil.copy2(cache_path, dest_path)
+                return True, dest_path
+            except (IOError, OSError, shutil.Error) as e:
+                logger.debug("Failed to copy skin: %s", e)
         return False, None
     
     def download_cape(self, username: str, force: bool = False) -> Tuple[bool, Optional[str]]:

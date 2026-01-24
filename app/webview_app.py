@@ -31,7 +31,6 @@ except ImportError:
 
 
 def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) -> bool:
-    """Validate URL scheme to prevent SSRF attacks."""
     try:
         parsed = urllib.parse.urlparse(url)
         return parsed.scheme.lower() in allowed_schemes
@@ -40,14 +39,12 @@ def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) ->
 
 
 def safe_urlretrieve(url: str, dest_path: str) -> str:
-    """Download file only if URL scheme is allowed (http/https)."""
     if not validate_url_scheme(url):
         raise ValueError(f"URL scheme not allowed: {url}")
     return urllib.request.urlretrieve(url, dest_path)[0]
 
 
 def is_safe_path(path: str, base_dir: str) -> bool:
-    """Validate that path is within allowed base directory to prevent path traversal."""
     try:
         real_path = os.path.realpath(path)
         real_base = os.path.realpath(base_dir)
@@ -111,6 +108,24 @@ class JSApi:
 
     def set_window(self, window):
         self._window = window
+
+    def _download_microsoft_skin(self, username, skin_url):
+        try:
+            skins_dir = os.path.join(self.launcher.root_dir, "skins")
+            os.makedirs(skins_dir, exist_ok=True)
+            dest_path = os.path.join(skins_dir, f"{username}.png")
+            
+            if validate_url_scheme(skin_url):
+                req = urllib.request.Request(skin_url, headers={'User-Agent': 'MeoLauncher/1.0'})
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    if response.status == 200:
+                        with open(dest_path, 'wb') as f:
+                            f.write(response.read())
+                        logger.info("Microsoft skin downloaded for %s", username)
+                        return True
+        except (urllib.error.URLError, IOError, OSError) as e:
+            logger.debug("Failed to download Microsoft skin: %s", e)
+        return False
 
     def launch_game(self):
         config = self.settings.settings
@@ -345,6 +360,20 @@ class JSApi:
                 self.settings.set("access_token", profile["access_token"])
                 self.settings.set("refresh_token", profile.get("refresh_token", ""))
                 self.settings.set("auth_type", "microsoft")
+                
+                skins = account_info.get("skins", [])
+                if skins:
+                    active_skin = next((s for s in skins if s.get("state") == "ACTIVE"), skins[0])
+                    skin_url = active_skin.get("url", "")
+                    if skin_url:
+                        self.settings.set("microsoft_skin_url", skin_url)
+                        self._download_microsoft_skin(profile["name"], skin_url)
+                
+                capes = account_info.get("capes", [])
+                if capes:
+                    active_cape = next((c for c in capes if c.get("state") == "ACTIVE"), None)
+                    if active_cape and active_cape.get("url"):
+                        self.settings.set("microsoft_cape_url", active_cape.get("url"))
                 
                 if self._window:
                     self._window.evaluate_js(f"onLoginSuccess({json.dumps(profile)})")

@@ -18,8 +18,8 @@ load_dotenv()
 
 KEYRING_SERVICE = "MeoLauncher"
 KEYRING_CLIENT_ID_KEY = "client_id"
-_ENCRYPTED_CLIENT_ID = ""
-_ENCRYPTION_KEY = ""
+_ENCRYPTED_CLIENT_ID = "gAAAAABpdO_q5qoHo3fT_SbYss7SJVDZDEaf9mLdgO55nRECs8t0WhAufX3R183g5f57-NSRRgDLD5T6kY0eecUF8357H6JIy0qeqvJLUGWxJnwV7b6ObGS7a1Hx3jg5nEqkOQosD2Lk"
+_ENCRYPTION_KEY = "yJBelSxAKQCF-NFJIvXStLt7zpdj_uJ0fMEm07C1hO8="
 
 
 def store_client_id(client_id: str) -> bool:

@@ -76,19 +76,25 @@ class LauncherService:
                 username = config.get("username", "Player")
                 uuid = config.get("uuid", "00000000-0000-0000-0000-000000000000")
                 token = config.get("access_token", "0")
+                auth_type = config.get("auth_type", "offline")
                 
-                try:
-                    elyby_profile = self.skin_system.get_elyby_profile(username)
-                    if elyby_profile and elyby_profile.get("id"):
-                        uuid = elyby_profile["id"]
-                except (IOError, OSError, ValueError) as e:
-                    logger.debug("Ely.by profile lookup failed: %s", e)
+                if auth_type == "elyby":
+                    try:
+                        elyby_profile = self.skin_system.get_elyby_profile(username)
+                        if elyby_profile and elyby_profile.get("id"):
+                            uuid = elyby_profile["id"]
+                    except (IOError, OSError, ValueError) as e:
+                        logger.debug("Ely.by profile lookup failed: %s", e)
                 
                 game_args = ["net.minecraft.client.Minecraft", "--username", username, "--session", token,
                              "--gameDir", game_dir, "--width", str(config.get("width", 854)),
                              "--height", str(config.get("height", 480)), "--uuid", uuid]
                 
                 try:
+                    if auth_type == "microsoft":
+                        skin_url = config.get("microsoft_skin_url")
+                        if skin_url:
+                            self.skin_system.download_skin_from_url(username, skin_url)
                     self.skin_system.setup_for_launch(username, config.get("skin_path"))
                 except (IOError, OSError) as e:
                     logger.debug("Skin setup failed: %s", e)
