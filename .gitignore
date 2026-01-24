@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / Installer
+build/
+dist/
+dist_debug/
+output-build/
+*.exe
+*.msi
+installer/*.exe
+
+# Large Assets (not tracked - download separately)
+app/game/
+app/java_pkg/
+
+# Environment
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.txt
+!requirements.txt
+crash_log.txt
+debug_output.txt
+debug_stderr.txt
+
+# User Data
+.launcher/
+data/
+
+# Agent Files
+.agent/
+AGENT_RULES.md
+AZURE_SETUP.md

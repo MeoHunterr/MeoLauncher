@@ -1,0 +1,181 @@
+<!-- SETTINGS VIEW -->
+<div id="view-settings" class="view-section hidden w-full max-w-2xl text-left">
+    <h2 class="text-3xl font-bold text-white mb-6" data-i18n="settings">Settings</h2>
+
+    <div class="space-y-4 h-[400px] overflow-y-auto pr-2">
+        <!-- Language -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3" data-i18n="language">Language</h3>
+            <select id="setting-language" onchange="changeLanguage(this.value)"
+                class="bg-theme-tertiary border border-theme rounded px-3 py-2 text-white w-full">
+                <option value="en">English</option>
+                <option value="vi">Tiếng Việt</option>
+            </select>
+        </div>
+
+        <!-- Theme Selection -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-theme-primary mb-3" data-i18n="theme">Theme</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Midnight -->
+                <div onclick="changeTheme('midnight')" class="cursor-pointer group">
+                    <div
+                        class="h-20 rounded-lg bg-[#1f2022] border-2 border-[#2d2f33] group-hover:border-[#39d353] relative overflow-hidden transition-all">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-[#212326] border border-[#2d2f33]"></div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-[#39d353]"></div>
+                    </div>
+                    <p class="text-xs text-center mt-1 text-theme-secondary group-hover:text-theme-primary">Midnight</p>
+                </div>
+                <!-- Radiant -->
+                <div onclick="changeTheme('radiant')" class="cursor-pointer group">
+                    <div
+                        class="h-20 rounded-lg bg-[#09090b] border-2 border-[#27272a] group-hover:border-[#d946ef] relative overflow-hidden transition-all">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-[#18181b] border border-[#27272a]"></div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6]">
+                        </div>
+                    </div>
+                    <p class="text-xs text-center mt-1 text-theme-secondary group-hover:text-theme-primary">Radiant</p>
+                </div>
+                <!-- Frosted -->
+                <div onclick="changeTheme('frosted')" class="cursor-pointer group">
+                    <div
+                        class="h-20 rounded-lg bg-slate-800 border-2 border-slate-600 group-hover:border-sky-400 relative overflow-hidden transition-all">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-slate-700/50 backdrop-blur border border-white/10">
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-indigo-400">
+                        </div>
+                    </div>
+                    <p class="text-xs text-center mt-1 text-theme-secondary group-hover:text-theme-primary">Frosted</p>
+                </div>
+                <!-- Sunset -->
+                <div onclick="changeTheme('sunset')" class="cursor-pointer group">
+                    <div
+                        class="h-20 rounded-lg bg-[#1c1917] border-2 border-[#44403c] group-hover:border-[#f97316] relative overflow-hidden transition-all">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-[#292524] border border-[#44403c]"></div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-pink-600">
+                        </div>
+                    </div>
+                    <p class="text-xs text-center mt-1 text-theme-secondary group-hover:text-theme-primary">Sunset</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Background -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3">Background</h3>
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs text-theme-secondary" id="bg-status">Default background</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="pickBackground()"
+                        class="bg-theme-tertiary hover:bg-[#3d3f44] text-white text-sm px-4 py-2 rounded">
+                        Change
+                    </button>
+                    <button onclick="resetBackground()"
+                        class="bg-gray-600 hover:bg-gray-500 text-white text-sm px-3 py-2 rounded">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3" data-i18n="memory">Memory (RAM)</h3>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-400 w-10">Min:</span>
+                <input type="number" id="setting-min-ram"
+                    class="bg-theme-tertiary border border-theme rounded px-3 py-2 text-white w-20" value="1024">
+                <span class="text-gray-400">MB</span>
+                <span class="text-gray-400 w-10 ml-4">Max:</span>
+                <input type="number" id="setting-max-ram"
+                    class="bg-theme-tertiary border border-theme rounded px-3 py-2 text-white w-20" value="2048">
+                <span class="text-gray-400">MB</span>
+            </div>
+        </div>
+
+        <!-- Resolution -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3" data-i18n="resolution">Resolution</h3>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-400 w-10">W:</span>
+                <input type="number" id="setting-width"
+                    class="bg-theme-tertiary border border-theme rounded px-3 py-2 text-white w-20" value="854">
+                <span class="text-gray-400 w-10 ml-4">H:</span>
+                <input type="number" id="setting-height"
+                    class="bg-theme-tertiary border border-theme rounded px-3 py-2 text-white w-20" value="480">
+            </div>
+            <div class="mt-3 flex items-center">
+                <input type="checkbox" id="setting-fullscreen" class="w-4 h-4 rounded">
+                <label for="setting-fullscreen" class="ml-2 text-theme-primary"
+                    data-i18n="fullscreen">Fullscreen</label>
+            </div>
+        </div>
+
+        <!-- Java -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3" data-i18n="java_runtime">Java Runtime</h3>
+            <input type="text" id="setting-java-path"
+                class="w-full bg-theme-tertiary border border-theme rounded px-3 py-2 text-white"
+                placeholder="Auto-detect">
+        </div>
+
+        <!-- Advanced -->
+        <div class="bg-theme-secondary/80 p-4 rounded-lg border border-theme">
+            <h3 class="text-md font-bold text-white mb-3" data-i18n="advanced">Advanced</h3>
+            <div class="space-y-2">
+                <div class="flex items-center">
+                    <input type="checkbox" id="setting-close-launcher" class="w-4 h-4 rounded">
+                    <label for="setting-close-launcher" class="ml-2 text-theme-primary" data-i18n="close_launcher">Close
+                        Launcher on Start</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="setting-show-console" class="w-4 h-4 rounded">
+                    <label for="setting-show-console" class="ml-2 text-theme-primary" data-i18n="show_console">Show Game
+                        Console</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="setting-debug-mode" class="w-4 h-4 rounded">
+                    <label for="setting-debug-mode" class="ml-2 text-theme-primary" data-i18n="debug_mode">Debug Mode
+                        (Dev Tools)</label>
+                </div>
+                <div class="mt-2">
+                    <label class="block text-xs font-bold text-theme-secondary mb-1" data-i18n="custom_jvm">Custom JVM
+                        Args</label>
+                    <input type="text" id="setting-custom-jvm"
+                        class="w-full bg-theme-tertiary border border-theme rounded px-3 py-2 text-white"
+                        placeholder="-Xmx2G ...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="bg-[#2a1a1a]/80 p-4 rounded-lg border-2 border-red-900/50">
+            <h3 class="text-md font-bold text-red-400 mb-3" data-i18n="danger_zone">⚠️ Danger Zone</h3>
+            <p class="text-xs text-gray-400 mb-3" data-i18n="danger_zone_desc">These actions cannot be undone. Use with
+                caution.</p>
+            <button onclick="confirmClearGameData()"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors w-full flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                <span data-i18n="clear_game_data">Clear & Re-extract Game Data</span>
+            </button>
+        </div>
+
+        <button onclick="saveSettings()"
+            class="bg-[#39d353] hover:bg-[#2ea043] text-white font-bold py-2 px-6 rounded transition-colors w-full"
+            data-i18n="save_settings">Save Settings</button>
+    </div>
+</div>

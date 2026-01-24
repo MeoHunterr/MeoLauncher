@@ -1,0 +1,28 @@
+<!-- Login Modal -->
+<div id="login-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 450px;">
+        <h3 class="text-2xl font-bold text-white mb-4" data-i18n="ms_login">Microsoft Login</h3>
+        <p class="text-gray-400 mb-4" data-i18n="ms_login_desc">Go to the link below and enter this code:</p>
+
+        <div class="bg-theme-tertiary p-4 rounded mb-4 border border-theme flex items-center justify-between">
+            <span class="text-3xl font-mono font-bold text-[#39d353] tracking-widest select-text"
+                id="device-code">----</span>
+            <button onclick="copyCode()" id="copy-btn"
+                class="copy-btn bg-[#3d3f44] hover:bg-[#4d4f54] text-white px-3 py-2 rounded text-sm ml-4"
+                data-i18n="copy">Copy</button>
+        </div>
+
+        <a id="verification-uri" href="https://microsoft.com/link" target="_blank"
+            class="bg-[#00a4ef] hover:bg-[#0078d7] text-white font-bold py-3 px-6 rounded inline-block mb-4"
+            data-i18n="open_login_page">Open Login Page</a>
+
+        <div class="flex justify-center my-4">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#39d353]" id="login-spinner"></div>
+        </div>
+        <p class="text-sm text-theme-secondary" id="login-status" data-i18n="waiting_auth">Waiting for authentication...
+        </p>
+
+        <button onclick="closeLoginModal()" class="mt-4 text-theme-secondary hover:text-white text-sm"
+            data-i18n="cancel">Cancel</button>
+    </div>
+</div>

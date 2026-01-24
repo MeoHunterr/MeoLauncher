@@ -1,0 +1,10 @@
+﻿pywebview==5.3.2
+minecraft-launcher-lib==6.5
+requests==2.32.3
+python-dotenv==1.0.1
+cx_Freeze==7.2.0
+msal==1.31.0
+cryptography==42.0.5
+Pillow==10.2.0
+keyring==25.2.1
+psutil==5.9.8

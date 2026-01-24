@@ -1,0 +1,12 @@
+{
+  "java": {
+    "version": "1.0.0",
+    "archive_hash": "e260066137c80d803e1fa0194727e46e",
+    "extracted_at": 1769175881.7291439
+  },
+  "game": {
+    "version": "1.0.0",
+    "archive_hash": "85f96493c9fbd0f5001c1ec739be526a",
+    "extracted_at": 1769175906.452438
+  }
+}

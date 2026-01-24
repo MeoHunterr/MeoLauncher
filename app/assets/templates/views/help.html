@@ -1,0 +1,21 @@
+<!-- HELP VIEW -->
+<div id="view-help" class="view-section hidden w-full max-w-6xl text-left">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-3xl font-bold text-white" data-i18n="help">Help</h2>
+        <div class="flex gap-2">
+            <button id="help-lang-en" onclick="switchHelpLanguage('en')"
+                class="px-4 py-2 rounded text-sm font-medium bg-theme-tertiary text-theme-secondary hover:text-white transition-colors">
+                English
+            </button>
+            <button id="help-lang-vi" onclick="switchHelpLanguage('vi')"
+                class="px-4 py-2 rounded text-sm font-medium bg-theme-tertiary text-theme-secondary hover:text-white transition-colors">
+                Tiếng Việt
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-theme-secondary/80 rounded-xl p-6 border border-theme h-[500px] overflow-y-auto">
+        {% include 'views/help_en.html' %}
+        {% include 'views/help_vi.html' %}
+    </div>
+</div>

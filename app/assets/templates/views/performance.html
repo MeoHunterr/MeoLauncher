@@ -1,0 +1,161 @@
+<!-- PERFORMANCE VIEW -->
+<div id="view-performance" class="view-section hidden w-full max-w-2xl text-left">
+    <h2 class="text-3xl font-bold text-white mb-2" data-i18n="performance">Performance</h2>
+    <p class="text-theme-secondary mb-4">Pro-level optimizations for maximum FPS</p>
+
+    <div class="space-y-3 h-[420px] overflow-y-auto pr-2">
+        <!-- Micro-stutter Fix -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Reduce Micro-stutters</h3>
+                        <span class="text-xs bg-purple-600/30 text-purple-400 px-2 py-0.5 rounded">Smoother</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Use CMS GC (Recommended for Beta 1.7.3)</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-microstutter"><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- G1 Garbage Collector -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">G1 Garbage Collector</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+10-15% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Reduces lag spikes from memory cleanup</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-g1gc" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Memory Pre-Touch -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Memory Pre-Touch</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+5-10% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Pre-allocates RAM to prevent stuttering</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-pretouch" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Parallel GC -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Parallel GC</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+3-5% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Multi-core garbage collection</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-parallel" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Disable Biased Locking -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Disable Biased Locking</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+2-3% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Removes deprecated optimization overhead</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-nobiasedlock" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Expanded Code Cache -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Expanded Code Cache</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+5-8% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">More space for JIT compiled code</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-codecache" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Aggressive Inlining -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Aggressive Inlining</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+5-10% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Inline more method calls for speed</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-inlining" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Disable Explicit GC -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Disable Explicit GC</h3>
+                        <span class="text-xs bg-green-600/30 text-green-400 px-2 py-0.5 rounded">+2-4% FPS</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Ignore System.gc() calls from mods</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-noexplicitgc" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- Tiered Compilation -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">Tiered Compilation</h3>
+                        <span class="text-xs bg-blue-600/30 text-blue-400 px-2 py-0.5 rounded">Faster startup</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Quick start with gradual optimization</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-tiered" checked><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <!-- String Deduplication -->
+        <div class="bg-theme-secondary/80 p-3 rounded-lg border border-theme">
+            <div class="flex justify-between items-center">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-sm font-bold text-white">String Deduplication</h3>
+                        <span class="text-xs bg-yellow-600/30 text-yellow-400 px-2 py-0.5 rounded">-15% RAM</span>
+                    </div>
+                    <p class="text-xs text-theme-secondary mt-1">Less memory usage for text-heavy mods</p>
+                </div>
+                <label class="toggle ml-4"><input type="checkbox" id="perf-stringdedup"><span
+                        class="toggle-slider"></span></label>
+            </div>
+        </div>
+
+        <button onclick="savePerformance()"
+            class="bg-[#39d353] hover:bg-[#2ea043] text-white font-bold py-2 px-6 rounded transition-colors w-full mt-2"
+            data-i18n="apply_performance">Apply Performance Settings</button>
+    </div>
+</div>
