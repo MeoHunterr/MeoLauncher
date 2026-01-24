@@ -1,52 +1,76 @@
-function updateSkinUI(profile) {
+function updateSkinUI(profile, authType) {
     const loginContainer = document.getElementById('skin-login-container');
     const profileContainer = document.getElementById('skin-profile-container');
+    const microsoftNotice = document.getElementById('skin-microsoft-notice');
 
-    if (profile && profile.source === 'elyby') {
-        loginContainer.classList.add('hidden');
-        profileContainer.classList.remove('hidden');
+    if (authType === 'microsoft') {
+        if (loginContainer) loginContainer.classList.add('hidden');
+        if (profileContainer) profileContainer.classList.add('hidden');
+        if (microsoftNotice) microsoftNotice.classList.remove('hidden');
+    } else if (profile && profile.source === 'elyby') {
+        if (loginContainer) loginContainer.classList.add('hidden');
+        if (profileContainer) profileContainer.classList.remove('hidden');
+        if (microsoftNotice) microsoftNotice.classList.add('hidden');
         document.getElementById('profile-username').innerText = profile.username;
         document.getElementById('profile-uuid').innerText = 'UUID: ' + profile.uuid;
-        refreshSkin(profile.username);
+        refreshSkin(profile.username, 'elyby');
     } else {
-        loginContainer.classList.remove('hidden');
-        profileContainer.classList.add('hidden');
-        document.getElementById('elyby-password').value = '';
-        document.getElementById('elyby-2fa').value = '';
-        document.getElementById('elyby-2fa-container').classList.add('hidden');
+        if (loginContainer) loginContainer.classList.remove('hidden');
+        if (profileContainer) profileContainer.classList.add('hidden');
+        if (microsoftNotice) microsoftNotice.classList.add('hidden');
+        const pwEl = document.getElementById('elyby-password');
+        const tfaEl = document.getElementById('elyby-2fa');
+        const tfaContainer = document.getElementById('elyby-2fa-container');
+        if (pwEl) pwEl.value = '';
+        if (tfaEl) tfaEl.value = '';
+        if (tfaContainer) tfaContainer.classList.add('hidden');
     }
 }
 
-function refreshSkin(username) {
-    if (username) {
-        const skinUrl = `http://skinsystem.ely.by/skins/${username}.png`;
-        renderSkinPreview(skinUrl);
+function refreshSkin(username, authType) {
+    if (!username) {
+        pywebview.api.get_settings().then(settings => {
+            const user = settings.username;
+            const type = settings.auth_type || 'offline';
+            if (user) {
+                refreshSkin(user, type);
+            }
+        });
         return;
     }
 
-    pywebview.api.get_settings().then(settings => {
-        const user = settings.username;
-        if (user) {
-            const skinUrl = `http://skinsystem.ely.by/skins/${user}.png`;
-            renderSkinPreview(skinUrl);
-        }
-    });
+    let skinUrl;
+    if (authType === 'microsoft') {
+        pywebview.api.get_settings().then(settings => {
+            if (settings.microsoft_skin_url) {
+                renderSkinPreview(settings.microsoft_skin_url);
+            }
+        });
+    } else {
+        skinUrl = `http://skinsystem.ely.by/skins/${username}.png`;
+        renderSkinPreview(skinUrl);
+    }
 }
 
 function loadSkinSettings() {
     pywebview.api.get_settings().then(settings => {
-        if (settings.auth_type === 'elyby') {
+        const authType = settings.auth_type || 'offline';
+
+        if (authType === 'microsoft') {
+            updateSkinUI(null, 'microsoft');
+        } else if (authType === 'elyby') {
             updateSkinUI({
                 username: settings.username,
                 uuid: settings.uuid,
                 source: 'elyby'
-            });
+            }, 'elyby');
         } else {
-            updateSkinUI(null);
+            updateSkinUI(null, 'offline');
         }
 
         if (settings.custom_background) {
-            document.getElementById('bg-status').innerText = 'Custom background set';
+            const bgStatus = document.getElementById('bg-status');
+            if (bgStatus) bgStatus.innerText = 'Custom background set';
         }
     });
 }

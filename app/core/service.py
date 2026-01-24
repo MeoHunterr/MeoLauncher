@@ -101,8 +101,11 @@ class LauncherService:
                 
                 self._set_fullscreen_option(game_dir, config.get("fullscreen", False))
                 
-                authlib_path = self._find_authlib_injector()
-                authlib_args = [f"-javaagent:{authlib_path}=https://authserver.ely.by"] if authlib_path else []
+                authlib_args = []
+                if auth_type == "elyby":
+                    authlib_path = self._find_authlib_injector()
+                    if authlib_path:
+                        authlib_args = [f"-javaagent:{authlib_path}=https://authserver.ely.by"]
                 
                 full_cmd = [java_exe] + authlib_args + jvm_args + [f"-Djava.library.path={self.doctor.natives_dir}", "-cp", classpath] + game_args
                 

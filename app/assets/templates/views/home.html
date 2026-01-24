@@ -3,7 +3,9 @@
     <h2 class="text-4xl font-bold text-white mb-2">MEOLAUNCHER</h2>
     <p class="text-gray-400 mb-8">v2.0</p>
 
-    <div class="bg-theme-secondary/80 backdrop-blur p-6 rounded-lg border border-theme space-y-4">
+    <!-- Logged Out State -->
+    <div id="home-login-section"
+        class="bg-theme-secondary/80 backdrop-blur p-6 rounded-lg border border-theme space-y-4">
         <div>
             <label class="block text-left text-xs font-bold text-theme-secondary mb-1 uppercase"
                 data-i18n="username">Username</label>
@@ -33,6 +35,29 @@
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
             <span>Login with Ely.by</span>
+        </button>
+    </div>
+
+    <!-- Logged In State -->
+    <div id="home-account-section"
+        class="hidden bg-theme-secondary/80 backdrop-blur p-6 rounded-lg border border-theme">
+        <div class="flex items-center space-x-4 mb-4">
+            <div id="account-avatar"
+                class="w-16 h-16 bg-[#39d353] rounded-lg flex items-center justify-center text-2xl font-bold text-white">
+                P</div>
+            <div class="flex-1 text-left">
+                <p id="account-username" class="text-xl font-bold text-white">Player</p>
+                <p id="account-type" class="text-sm text-[#39d353]">Premium</p>
+            </div>
+        </div>
+        <button onclick="handleLogout()"
+            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded transition-colors flex items-center justify-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                </path>
+            </svg>
+            <span data-i18n="logout">Logout</span>
         </button>
     </div>
 </div>
