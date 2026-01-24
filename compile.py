@@ -26,8 +26,17 @@ else:
     print("[!] WARNING: .env file NOT found at expected path.")
 
 # ==== SECURE CLIENT_ID EMBEDDING (AES-128) ====
+import re
+import shutil
+import atexit
+
+_CREDENTIALS_PATH = os.path.join("app", "core", "credentials.py")
+_CREDENTIALS_BACKUP = None
+
 def embed_client_id():
     """Embed encrypted CLIENT_ID into credentials.py before build."""
+    global _CREDENTIALS_BACKUP
+    
     try:
         from cryptography.fernet import Fernet
     except ImportError:
@@ -36,37 +45,56 @@ def embed_client_id():
 
     client_id = os.getenv("CLIENT_ID")
     if not client_id:
-        print(f"[!] WARNING: CLIENT_ID not found in environment. Current keys: {list(os.environ.keys())}")
-        print("[!] WARNING: CLIENT_ID not found in .env - production builds will require .env file")
-        return
+        print(f"[!] ERROR: CLIENT_ID not found in .env file!")
+        print(f"[!] Create a .env file with: CLIENT_ID=your-azure-client-id")
+        print(f"[!] Current .env path: {env_path}")
+        sys.exit(1)
+    
+    if not os.path.exists(_CREDENTIALS_PATH):
+        print(f"[!] ERROR: {_CREDENTIALS_PATH} not found")
+        sys.exit(1)
+    
+    # Backup original file
+    _CREDENTIALS_BACKUP = _CREDENTIALS_PATH + ".backup"
+    shutil.copy2(_CREDENTIALS_PATH, _CREDENTIALS_BACKUP)
+    atexit.register(restore_credentials_py)
+    
+    with open(_CREDENTIALS_PATH, "r", encoding="utf-8") as f:
+        content = f.read()
     
     # Generate Key and Encrypt
     key = Fernet.generate_key()
-    f = Fernet(key)
-    encrypted_id = f.encrypt(client_id.encode()).decode()
+    fernet = Fernet(key)
+    encrypted_id = fernet.encrypt(client_id.encode()).decode()
     key_str = key.decode()
     
-    credentials_path = os.path.join("app", "core", "credentials.py")
+    # Use regex to replace values (works even if not empty)
+    new_content = re.sub(
+        r'_ENCRYPTED_CLIENT_ID\s*=\s*"[^"]*"',
+        f'_ENCRYPTED_CLIENT_ID = "{encrypted_id}"',
+        content
+    )
+    new_content = re.sub(
+        r'_ENCRYPTION_KEY\s*=\s*"[^"]*"',
+        f'_ENCRYPTION_KEY = "{key_str}"',
+        new_content
+    )
     
-    if os.path.exists(credentials_path):
-        with open(credentials_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        # Replace placeholders
-        new_content = content.replace(
-            '_ENCRYPTED_CLIENT_ID = ""',
-            f'_ENCRYPTED_CLIENT_ID = "{encrypted_id}"'
-        ).replace(
-            '_ENCRYPTION_KEY = ""',
-            f'_ENCRYPTION_KEY = "{key_str}"'
-        )
-        
-        with open(credentials_path, "w", encoding="utf-8") as f:
-            f.write(new_content)
-        
-        print(f"[OK] CLIENT_ID encrypted with AES-128 and embedded.")
-    else:
-        print(f"[!] WARNING: {credentials_path} not found")
+    with open(_CREDENTIALS_PATH, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    
+    print(f"[OK] CLIENT_ID encrypted with Fernet and embedded into credentials.py")
+    print(f"[OK] Client ID: {client_id[:8]}...{client_id[-4:]}")
+
+
+def restore_credentials_py():
+    """Restore original credentials.py after build (removes embedded secrets)."""
+    global _CREDENTIALS_BACKUP
+    if _CREDENTIALS_BACKUP and os.path.exists(_CREDENTIALS_BACKUP):
+        shutil.move(_CREDENTIALS_BACKUP, _CREDENTIALS_PATH)
+        print("[OK] credentials.py restored to original state")
+        _CREDENTIALS_BACKUP = None
+
 
 # ==== TEMPLATE RENDERING ====
 def render_templates():
