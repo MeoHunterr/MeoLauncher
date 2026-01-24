@@ -1,6 +1,5 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
-/* --- Theme Definitions --- */
 :root {
     --bg-primary: #1f2022;
     --bg-secondary: #212326;
@@ -31,8 +30,6 @@
     --accent-gradient: linear-gradient(135deg, #d946ef, #8b5cf6);
     --scrollbar-track: #09090b;
     --scrollbar-thumb: #27272a;
-    --danger-bg: rgba(69, 10, 10, 0.8);
-    --danger-border: #ef4444;
 }
 
 [data-theme="frosted"] {
@@ -62,11 +59,8 @@
     --accent-gradient: linear-gradient(to right, #f97316, #db2777);
     --scrollbar-track: #1c1917;
     --scrollbar-thumb: #44403c;
-    --danger-bg: rgba(67, 20, 7, 0.8);
-    --danger-border: #c2410c;
 }
 
-/* --- Global Styles --- */
 body {
     font-family: 'Inter', sans-serif;
     user-select: none;
@@ -103,8 +97,7 @@ body {
     -webkit-app-region: no-drag;
 }
 
-.text-accent,
-.text-accent-green {
+.text-accent {
     color: var(--accent-color);
 }
 
@@ -112,7 +105,6 @@ body {
     background: var(--accent-gradient);
     box-shadow: 0 4px 0 var(--accent-hover);
     transition: all 0.1s ease;
-    color: white;
 }
 
 .btn-launch:active {
@@ -132,7 +124,7 @@ body {
 
 .nav-item.active {
     background-color: rgba(255, 255, 255, 0.05);
-    border-left: 4px solid var(--accent-color);
+    border-left-color: var(--accent-color);
     color: var(--text-primary);
 }
 
@@ -195,7 +187,6 @@ body {
 
 [data-theme="frosted"] .modal-box {
     backdrop-filter: var(--backdrop-blur);
-    background: var(--bg-secondary);
 }
 
 .copy-btn {
@@ -264,14 +255,6 @@ body {
     background: rgba(57, 211, 83, 0.1);
 }
 
-[data-theme="radiant"] .lang-btn.selected,
-[data-theme="sunset"] .lang-btn.selected,
-[data-theme="frosted"] .lang-btn.selected {
-    background: var(--bg-secondary);
-    color: var(--accent-color);
-}
-
-/* Utility Classes */
 .bg-theme-secondary {
     background-color: var(--bg-secondary);
 }
@@ -301,7 +284,6 @@ body {
     color: var(--danger-text);
 }
 
-/* Preview Grid Styles */
 .preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -391,4 +373,15 @@ body {
 .preview-size {
     font-size: 11px;
     color: var(--text-secondary);
+}
+
+select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+select option {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 8px;
 }

@@ -2,10 +2,17 @@
 <div
     class="relative z-20 h-24 bg-theme-tertiary/90 backdrop-blur-sm border-t border-theme flex items-center justify-center px-8">
     <div class="absolute left-8 flex flex-col">
-        <span class="text-xs text-theme-secondary uppercase font-bold">Version</span>
-        <select id="version-selector" class="bg-transparent text-white font-bold outline-none cursor-pointer">
-            <option>Loading...</option>
-        </select>
+        <span class="text-xs text-theme-secondary uppercase font-bold mb-1">Version</span>
+        <div class="relative">
+            <select id="version-selector"
+                class="appearance-none bg-theme-secondary border border-theme rounded-lg px-4 py-2 pr-8 text-white font-medium outline-none cursor-pointer hover:border-[#39d353] focus:border-[#39d353] transition-colors min-w-[160px]">
+                <option>Loading...</option>
+            </select>
+            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-secondary pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </div>
     </div>
 
     <button onclick="launchGame()"

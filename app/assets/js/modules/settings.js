@@ -116,8 +116,14 @@ function loadVersions() {
 function saveUsername() {
     const username = document.getElementById('input-username').value;
     if (username) {
-        pywebview.api.save_settings({ username: username, auth_type: 'offline' }).then(() => {
-            updateUserUI(username, 'offline');
+        pywebview.api.get_settings().then(settings => {
+            const currentAuth = settings.auth_type || 'offline';
+            if (currentAuth === 'microsoft' || currentAuth === 'elyby') {
+                return;
+            }
+            pywebview.api.save_settings({ username: username, auth_type: 'offline' }).then(() => {
+                updateUserUI(username, 'offline');
+            });
         });
     }
 }
