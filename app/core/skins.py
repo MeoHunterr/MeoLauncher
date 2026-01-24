@@ -1,10 +1,32 @@
 import os
 import urllib.request
 import urllib.error
+import urllib.parse
 import json
 import time
 import shutil
+import logging
 from typing import Optional, Dict, Tuple
+
+logger = logging.getLogger(__name__)
+
+
+def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) -> bool:
+    """Validate URL scheme to prevent SSRF attacks."""
+    try:
+        parsed = urllib.parse.urlparse(url)
+        return parsed.scheme.lower() in allowed_schemes
+    except Exception:
+        return False
+
+
+def safe_urlopen(url: str, timeout: int = 10, headers: dict = None):
+    """Open URL only if scheme is allowed (http/https). Blocks file:// and other schemes."""
+    if not validate_url_scheme(url):
+        raise ValueError(f"URL scheme not allowed: {url}")
+    
+    request = urllib.request.Request(url, headers=headers or {'User-Agent': 'MeoLauncher/1.0'})
+    return urllib.request.urlopen(request, timeout=timeout)
 
 
 class SkinSystem:
@@ -28,16 +50,16 @@ class SkinSystem:
             try:
                 with open(self.cache_meta_file, 'r') as f:
                     return json.load(f)
-            except Exception:
-                pass
+            except (json.JSONDecodeError, IOError, OSError) as e:
+                logger.debug("Failed to load cache meta: %s", e)
         return {}
     
     def _save_cache_meta(self):
         try:
             with open(self.cache_meta_file, 'w') as f:
                 json.dump(self.cache_meta, f)
-        except Exception:
-            pass
+        except (IOError, OSError) as e:
+            logger.debug("Failed to save cache meta: %s", e)
     
     def _is_cache_valid(self, username: str) -> bool:
         username_lower = username.lower()
@@ -47,14 +69,13 @@ class SkinSystem:
     
     def _download_file(self, url: str, dest_path: str) -> bool:
         try:
-            request = urllib.request.Request(url, headers={'User-Agent': 'MeoLauncher/1.0'})
-            with urllib.request.urlopen(request, timeout=10) as response:
+            with safe_urlopen(url, timeout=10) as response:
                 if response.status == 200:
                     with open(dest_path, 'wb') as f:
                         f.write(response.read())
                     return True
-        except Exception:
-            pass
+        except (urllib.error.URLError, ValueError, IOError, OSError) as e:
+            logger.debug("Download failed for %s: %s", url, e)
         return False
     
     def download_skin(self, username: str, force: bool = False) -> Tuple[bool, Optional[str]]:
@@ -96,7 +117,8 @@ class SkinSystem:
             try:
                 shutil.copy2(skin_path, dest_path)
                 return True
-            except Exception:
+            except (IOError, OSError, shutil.Error) as e:
+                logger.debug("Failed to copy skin: %s", e)
                 return False
         
         success, downloaded_path = self.download_skin(username)
@@ -104,8 +126,8 @@ class SkinSystem:
             try:
                 shutil.copy2(downloaded_path, dest_path)
                 return True
-            except Exception:
-                pass
+            except (IOError, OSError, shutil.Error) as e:
+                logger.debug("Failed to apply downloaded skin: %s", e)
         return False
     
     def apply_cape_to_game(self, username: str) -> bool:
@@ -118,21 +140,18 @@ class SkinSystem:
             try:
                 shutil.copy2(downloaded_path, dest_path)
                 return True
-            except Exception:
-                pass
+            except (IOError, OSError, shutil.Error) as e:
+                logger.debug("Failed to apply cape: %s", e)
         return False
     
     def get_textures_info(self, username: str) -> Optional[Dict]:
         try:
-            request = urllib.request.Request(
-                self.TEXTURES_URL.format(username=username),
-                headers={'User-Agent': 'MeoLauncher/1.0'}
-            )
-            with urllib.request.urlopen(request, timeout=10) as response:
+            url = self.TEXTURES_URL.format(username=username)
+            with safe_urlopen(url, timeout=10) as response:
                 if response.status == 200:
                     return json.loads(response.read().decode('utf-8'))
-        except Exception:
-            pass
+        except (urllib.error.URLError, ValueError, json.JSONDecodeError) as e:
+            logger.debug("Failed to get textures for %s: %s", username, e)
         return None
     
     def setup_for_launch(self, username: str, custom_skin_path: Optional[str] = None, on_log=None) -> Dict[str, bool]:
@@ -155,45 +174,36 @@ class SkinSystem:
     
     def get_elyby_profile(self, username: str) -> Optional[Dict]:
         try:
-            request = urllib.request.Request(
-                f"http://skinsystem.ely.by/profile/{username}",
-                headers={'User-Agent': 'MeoLauncher/1.0'}
-            )
-            with urllib.request.urlopen(request, timeout=10) as response:
+            url = f"http://skinsystem.ely.by/profile/{username}"
+            with safe_urlopen(url, timeout=10) as response:
                 if response.status == 200:
                     data = json.loads(response.read().decode('utf-8'))
                     return {"id": data.get("id", ""), "name": data.get("name", username), "source": "elyby"}
-        except Exception:
-            pass
+        except (urllib.error.URLError, ValueError, json.JSONDecodeError) as e:
+            logger.debug("Failed to get Ely.by profile for %s: %s", username, e)
         return None
 
 
 def get_elyby_uuid(username: str) -> Optional[str]:
     try:
-        request = urllib.request.Request(
-            f"http://skinsystem.ely.by/profile/{username}",
-            headers={'User-Agent': 'MeoLauncher/1.0'}
-        )
-        with urllib.request.urlopen(request, timeout=10) as response:
+        url = f"http://skinsystem.ely.by/profile/{username}"
+        with safe_urlopen(url, timeout=10) as response:
             if response.status == 200:
                 return json.loads(response.read().decode('utf-8')).get("id")
-    except Exception:
-        pass
+    except (urllib.error.URLError, ValueError, json.JSONDecodeError) as e:
+        logger.debug("Failed to get Ely.by UUID for %s: %s", username, e)
     return None
 
 
 def download_skin_from_elyby(username: str, dest_path: str) -> bool:
     try:
-        request = urllib.request.Request(
-            f"http://skinsystem.ely.by/skins/{username}.png",
-            headers={'User-Agent': 'MeoLauncher/1.0'}
-        )
-        with urllib.request.urlopen(request, timeout=10) as response:
+        url = f"http://skinsystem.ely.by/skins/{username}.png"
+        with safe_urlopen(url, timeout=10) as response:
             if response.status == 200:
                 os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                 with open(dest_path, 'wb') as f:
                     f.write(response.read())
                 return True
-    except Exception:
-        pass
+    except (urllib.error.URLError, ValueError, IOError, OSError) as e:
+        logger.debug("Failed to download skin for %s: %s", username, e)
     return False

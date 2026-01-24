@@ -2,6 +2,9 @@ import os
 import platform
 import zipfile
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AdvancedJavaManager:
@@ -78,5 +81,6 @@ class AdvancedJavaManager:
     def check_java_status(self):
         try:
             return f"Ready ({os.path.basename(self.get_java_executable())})"
-        except Exception:
+        except (FileNotFoundError, OSError) as e:
+            logger.debug("Java status check failed: %s", e)
             return "Missing"

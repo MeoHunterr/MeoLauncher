@@ -5,9 +5,13 @@ import threading
 import time
 import ctypes
 import urllib.request
+import urllib.parse
 import subprocess
 import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,6 +27,32 @@ except ImportError:
     JINJA2_AVAILABLE = False
 
 
+def validate_url_scheme(url: str, allowed_schemes: tuple = ('http', 'https')) -> bool:
+    """Validate URL scheme to prevent SSRF attacks."""
+    try:
+        parsed = urllib.parse.urlparse(url)
+        return parsed.scheme.lower() in allowed_schemes
+    except Exception:
+        return False
+
+
+def safe_urlretrieve(url: str, dest_path: str) -> str:
+    """Download file only if URL scheme is allowed (http/https)."""
+    if not validate_url_scheme(url):
+        raise ValueError(f"URL scheme not allowed: {url}")
+    return urllib.request.urlretrieve(url, dest_path)[0]
+
+
+def is_safe_path(path: str, base_dir: str) -> bool:
+    """Validate that path is within allowed base directory to prevent path traversal."""
+    try:
+        real_path = os.path.realpath(path)
+        real_base = os.path.realpath(base_dir)
+        return real_path.startswith(real_base)
+    except Exception:
+        return False
+
+
 def is_webview2_installed():
     import winreg
     registry_paths = [
@@ -33,8 +63,8 @@ def is_webview2_installed():
         try:
             with winreg.OpenKey(hkey, path):
                 return True
-        except Exception:
-            pass
+        except (OSError, FileNotFoundError):
+            logger.debug("WebView2 registry key not found at %s", path)
     return False
 
 
@@ -47,7 +77,7 @@ def download_and_install_webview2():
         "Missing Component", 0x40 | 0x1)
 
     try:
-        urllib.request.urlretrieve(installer_url, installer_path)
+        safe_urlretrieve(installer_url, str(installer_path))
         
         if not installer_path.exists() or installer_path.stat().st_size < 100000:
             raise RuntimeError("Download failed or file corrupted")
@@ -59,7 +89,8 @@ def download_and_install_webview2():
             
         ctypes.windll.user32.MessageBoxW(0, "WebView2 installed successfully!", "Success", 0x40)
         return True
-    except Exception as e:
+    except (urllib.error.URLError, ValueError, RuntimeError, OSError) as e:
+        logger.error("Failed to install WebView2: %s", e)
         if installer_path.exists():
             os.remove(installer_path)
         ctypes.windll.user32.MessageBoxW(0, f"Failed: {e}\nInstall manually from:\nhttps://developer.microsoft.com/microsoft-edge/webview2/", "Error", 0x10)
@@ -67,6 +98,8 @@ def download_and_install_webview2():
 
 
 class JSApi:
+    ALLOWED_FOLDER_TYPES = {"screenshots", "texturepacks", "game"}
+    
     def __init__(self, launcher_service, settings_mgr):
         self._window = None
         self.launcher = launcher_service
@@ -119,9 +152,14 @@ class JSApi:
             recommended = (recommended // 512) * 512
             return {"total_ram_mb": total_ram_mb, "recommended_ram_mb": recommended}
         except ImportError:
+            logger.debug("psutil not available, using defaults")
             return {"total_ram_mb": 8192, "recommended_ram_mb": 4096}
 
     def open_folder(self, folder_type):
+        if folder_type not in self.ALLOWED_FOLDER_TYPES:
+            logger.warning("Attempted to open unknown folder type: %s", folder_type)
+            return {"status": "error", "message": "Unknown folder type"}
+        
         base_dir = self.launcher.root_dir
         folder_map = {
             "screenshots": os.path.join(base_dir, "screenshots"),
@@ -129,11 +167,18 @@ class JSApi:
             "game": base_dir
         }
         path = folder_map.get(folder_type)
-        if path:
+        
+        if path and is_safe_path(path, base_dir):
             os.makedirs(path, exist_ok=True)
-            os.startfile(path)
-            return {"status": "success"}
-        return {"status": "error", "message": "Unknown folder type"}
+            if os.path.isdir(path):
+                os.startfile(path)
+                return {"status": "success"}
+            else:
+                logger.warning("Path is not a directory: %s", path)
+                return {"status": "error", "message": "Invalid path"}
+        
+        logger.warning("Path validation failed for: %s", path)
+        return {"status": "error", "message": "Path validation failed"}
     
     def pick_background_image(self):
         try:
@@ -154,7 +199,8 @@ class JSApi:
                 self.settings.set("custom_background", dest_path)
                 return {"status": "success", "path": dest_path}
             return {"status": "cancelled"}
-        except Exception as e:
+        except (IOError, OSError, shutil.Error) as e:
+            logger.error("Failed to pick background: %s", e)
             return {"status": "error", "message": str(e)}
     
     def pick_skin_file(self):
@@ -176,7 +222,8 @@ class JSApi:
                 self.settings.set("skin_path", dest_path)
                 return {"status": "success", "path": dest_path, "filename": filename}
             return {"status": "cancelled"}
-        except Exception as e:
+        except (IOError, OSError, shutil.Error) as e:
+            logger.error("Failed to pick skin: %s", e)
             return {"status": "error", "message": str(e)}
     
     def clear_custom_background(self):
@@ -216,8 +263,10 @@ class JSApi:
             return result
             
         except ImportError as e:
+            logger.error("Missing module for Microsoft login: %s", e)
             return {"status": "error", "message": f"Missing: {e}. Run: pip install minecraft-launcher-lib"}
         except Exception as e:
+            logger.error("Microsoft login failed: %s", e)
             return {"status": "error", "message": str(e)}
 
     def start_elyby_login(self, username, password, totp_token=None):
@@ -240,11 +289,14 @@ class JSApi:
             except ElybyTwoFactorRequired:
                 return {"status": "2fa_required", "message": "Enter 2FA code"}
             except ElybyAuthError as e:
+                logger.debug("Ely.by auth error: %s", e)
                 return {"status": "error", "message": str(e)}
                 
         except ImportError as e:
+            logger.error("Missing module for Ely.by login: %s", e)
             return {"status": "error", "message": f"Missing module: {e}"}
         except Exception as e:
+            logger.error("Ely.by login failed: %s", e)
             return {"status": "error", "message": str(e)}
 
     def minimize(self):
@@ -257,8 +309,11 @@ class JSApi:
     
     def open_url(self, url):
         import webbrowser
-        webbrowser.open(url)
-        return {"status": "success"}
+        if validate_url_scheme(url):
+            webbrowser.open(url)
+            return {"status": "success"}
+        logger.warning("Blocked URL with invalid scheme: %s", url)
+        return {"status": "error", "message": "Invalid URL scheme"}
     
     def clear_game_data(self):
         try:
@@ -272,11 +327,14 @@ class JSApi:
             if success:
                 return {"status": "success", "message": "Game data cleared. Re-extraction on next launch."}
             return {"status": "info", "message": "No data to clear."}
-        except Exception as e:
+        except (IOError, OSError) as e:
+            logger.error("Failed to clear game data: %s", e)
             return {"status": "error", "message": str(e)}
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')
+    
     if not is_webview2_installed():
         if not download_and_install_webview2():
             sys.exit(1)
@@ -311,8 +369,8 @@ def main():
             if os.path.exists(templates_dir):
                 try:
                     TemplateRenderer(templates_dir).render_to_file(main_html, "base.html")
-                except Exception:
-                    pass
+                except (IOError, OSError) as e:
+                    logger.debug("Template rendering failed: %s", e)
 
     window = webview.create_window(
         'Minecraft Launcher', 
@@ -335,7 +393,8 @@ def main():
             window.evaluate_js("if(window.updateStatus) updateStatus('Ready!');")
             time.sleep(0.5)
             window.load_url(f'file:///{main_html}')
-        except Exception as e:
+        except (IOError, OSError) as e:
+            logger.error("Init sequence failed: %s", e)
             window.evaluate_js(f"alert('Error: {e}');")
 
     threading.Thread(target=init_sequence, daemon=True).start()

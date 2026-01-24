@@ -7,6 +7,9 @@ import os
 import sys
 import subprocess
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LauncherService:
@@ -78,8 +81,8 @@ class LauncherService:
                     elyby_profile = self.skin_system.get_elyby_profile(username)
                     if elyby_profile and elyby_profile.get("id"):
                         uuid = elyby_profile["id"]
-                except Exception:
-                    pass
+                except (IOError, OSError, ValueError) as e:
+                    logger.debug("Ely.by profile lookup failed: %s", e)
                 
                 game_args = ["net.minecraft.client.Minecraft", "--username", username, "--session", token,
                              "--gameDir", game_dir, "--width", str(config.get("width", 854)),
@@ -87,8 +90,8 @@ class LauncherService:
                 
                 try:
                     self.skin_system.setup_for_launch(username, config.get("skin_path"))
-                except Exception:
-                    pass
+                except (IOError, OSError) as e:
+                    logger.debug("Skin setup failed: %s", e)
                 
                 self._set_fullscreen_option(game_dir, config.get("fullscreen", False))
                 
@@ -111,6 +114,7 @@ class LauncherService:
                 if on_exit: on_exit(self.process.returncode)
                     
             except Exception as e:
+                logger.error("Launch failed: %s", e)
                 if on_log: on_log(f"Error: {e}")
                 if on_exit: on_exit(-1)
 
@@ -152,5 +156,5 @@ class LauncherService:
             
             with open(options_path, "w") as f:
                 f.writelines(new_lines)
-        except Exception:
-            pass
+        except (IOError, OSError) as e:
+            logger.debug("Could not set fullscreen option: %s", e)

@@ -2,7 +2,10 @@ import requests
 import uuid as uuid_lib
 import json
 import os
+import logging
 from typing import Optional, Dict
+
+logger = logging.getLogger(__name__)
 
 
 class ElybyAuthError(Exception):
@@ -32,8 +35,8 @@ class ElybyAuth:
             try:
                 with open(self.credentials_file, 'r') as f:
                     return json.load(f).get("client_token", str(uuid_lib.uuid4()))
-            except Exception:
-                pass
+            except (json.JSONDecodeError, IOError, OSError) as e:
+                logger.debug("Failed to load client token: %s", e)
         return str(uuid_lib.uuid4())
     
     def _load_credentials(self):
@@ -44,8 +47,8 @@ class ElybyAuth:
                     self.access_token = data.get("access_token")
                     self.uuid = data.get("uuid")
                     self.username = data.get("username")
-            except Exception:
-                pass
+            except (json.JSONDecodeError, IOError, OSError) as e:
+                logger.debug("Failed to load credentials: %s", e)
     
     def _save_credentials(self):
         if self.credentials_file:
@@ -58,8 +61,8 @@ class ElybyAuth:
                         "uuid": self.uuid,
                         "username": self.username
                     }, f)
-            except Exception:
-                pass
+            except (IOError, OSError) as e:
+                logger.debug("Failed to save credentials: %s", e)
     
     def authenticate(self, username: str, password: str, totp_token: Optional[str] = None) -> Dict:
         actual_password = f"{password}:{totp_token}" if totp_token else password
@@ -110,8 +113,8 @@ class ElybyAuth:
                 self.username = data["selectedProfile"]["name"]
                 self._save_credentials()
                 return True
-        except Exception:
-            pass
+        except (requests.RequestException, KeyError, json.JSONDecodeError) as e:
+            logger.debug("Token refresh failed: %s", e)
         self.access_token = None
         return False
     
@@ -125,7 +128,8 @@ class ElybyAuth:
                 timeout=10
             )
             return resp.status_code in (200, 204)
-        except Exception:
+        except requests.RequestException as e:
+            logger.debug("Token validation failed: %s", e)
             return False
     
     def signout(self, username: str, password: str) -> bool:
@@ -139,8 +143,8 @@ class ElybyAuth:
                 self.access_token = self.uuid = self.username = None
                 self._save_credentials()
                 return True
-        except Exception:
-            pass
+        except requests.RequestException as e:
+            logger.debug("Signout failed: %s", e)
         return False
     
     def get_session_info(self) -> Optional[Dict]:

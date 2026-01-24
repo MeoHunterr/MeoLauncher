@@ -2,6 +2,9 @@ import os
 import zipfile
 import shutil
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class InstanceDoctor:
@@ -21,8 +24,8 @@ class InstanceDoctor:
         if os.path.exists(self.natives_dir):
             try:
                 shutil.rmtree(self.natives_dir)
-            except Exception:
-                pass
+            except (IOError, OSError, PermissionError) as e:
+                logger.debug("Could not clean natives dir: %s", e)
         
         os.makedirs(self.natives_dir, exist_ok=True)
         
@@ -34,5 +37,5 @@ class InstanceDoctor:
                     for file in zf.namelist():
                         if file.endswith(self.NATIVE_EXTENSIONS):
                             zf.extract(file, self.natives_dir)
-            except Exception:
-                pass
+            except (zipfile.BadZipFile, IOError, OSError) as e:
+                logger.debug("Failed to extract native %s: %s", native_jar, e)

@@ -1,6 +1,9 @@
 import json
 import os
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsManager:
@@ -34,7 +37,8 @@ class SettingsManager:
                     else:
                         merged[key] = value
                 return merged
-        except Exception:
+        except (json.JSONDecodeError, IOError, OSError) as e:
+            logger.debug("Failed to load settings, using defaults: %s", e)
             return self.DEFAULTS.copy()
 
     def save(self):
