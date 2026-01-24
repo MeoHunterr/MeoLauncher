@@ -33,7 +33,7 @@ class AntiCheat:
             try:
                 with open(self.cache_file, "r") as f:
                     return json.load(f)
-            except:
+            except (json.JSONDecodeError, IOError, OSError):
                 return {}
         return {}
 
@@ -41,14 +41,14 @@ class AntiCheat:
         try:
             with open(self.cache_file, "w") as f:
                 json.dump(self.cache, f)
-        except:
+        except (IOError, OSError):
             pass
 
     def _get_file_hash(self, path):
         try:
             stat = os.stat(path)
             return f"{stat.st_size}-{stat.st_mtime}"
-        except:
+        except (IOError, OSError):
             return None
 
     def scan_assets(self):
@@ -86,7 +86,7 @@ class AntiCheat:
             pass
         except SecurityViolation:
             raise
-        except Exception:
+        except (IOError, OSError, json.JSONDecodeError):
             pass
 
     def _check_file(self, file_path):
@@ -112,7 +112,7 @@ class AntiCheat:
                 pass
             except SecurityViolation:
                 raise
-            except Exception:
+            except (IOError, OSError):
                 pass
         
         if file_hash:
@@ -145,7 +145,7 @@ class AntiCheat:
                     raise SecurityViolation(f"X-ray detected: {filename}")
         except SecurityViolation:
             raise
-        except Exception:
+        except (IOError, OSError, ValueError):
             pass
 
     def monitor(self, process, on_violation):
@@ -178,7 +178,7 @@ class AntiCheat:
                             if on_violation:
                                 on_violation(str(e))
                             return
-                        except Exception:
+                        except (IOError, OSError):
                             pass
                     
                     snapshots[folder] = current_files

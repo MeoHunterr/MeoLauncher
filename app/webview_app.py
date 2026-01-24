@@ -83,7 +83,7 @@ class JSApi:
             import uuid
             import hashlib
             username = config.get("username", "Player")
-            hash_bytes = bytearray(hashlib.md5(f"OfflinePlayer:{username}".encode()).digest())
+            hash_bytes = bytearray(hashlib.md5(f"OfflinePlayer:{username}".encode(), usedforsecurity=False).digest())
             hash_bytes[6] = (hash_bytes[6] & 0x0f) | 0x30
             hash_bytes[8] = (hash_bytes[8] & 0x3f) | 0x80
             config["uuid"] = str(uuid.UUID(bytes=bytes(hash_bytes)))

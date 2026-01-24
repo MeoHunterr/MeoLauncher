@@ -32,7 +32,7 @@ class ResourceManager:
             try:
                 with open(manifest_path, 'r') as f:
                     return json.load(f)
-            except Exception:
+            except (json.JSONDecodeError, IOError, OSError):
                 pass
         return {}
     
@@ -46,12 +46,12 @@ class ResourceManager:
         if not os.path.exists(filepath):
             return None
         try:
-            hash_md5 = hashlib.md5()
+            file_hash = hashlib.sha256()
             with open(filepath, "rb") as f:
                 for chunk in iter(lambda: f.read(8192), b""):
-                    hash_md5.update(chunk)
-            return hash_md5.hexdigest()
-        except Exception:
+                    file_hash.update(chunk)
+            return file_hash.hexdigest()
+        except (IOError, OSError):
             return None
     
     def _validate_extraction(self, dest_dir, expected_files=None):
@@ -143,7 +143,7 @@ class ResourceManager:
                     else:
                         os.remove(path)
                     deleted = True
-                except Exception:
+                except (IOError, OSError, PermissionError):
                     pass
         
         return deleted
