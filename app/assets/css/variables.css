@@ -1,0 +1,60 @@
+:root {
+    --bg-primary: #1f2022;
+    --bg-secondary: #212326;
+    --bg-tertiary: #1a1b1d;
+    --border-color: #2d2f33;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --accent-color: #39d353;
+    --accent-hover: #2ea043;
+    --accent-gradient: linear-gradient(180deg, #39d353 0%, #2ea043 100%);
+    --scrollbar-track: #1f2022;
+    --scrollbar-thumb: #3d3f44;
+    --modal-overlay: rgba(0, 0, 0, 0.8);
+    --danger-bg: rgba(42, 26, 26, 0.8);
+    --danger-border: rgba(127, 29, 29, 0.5);
+    --danger-text: #f87171;
+}
+
+[data-theme="radiant"] {
+    --bg-primary: #09090b;
+    --bg-secondary: #18181b;
+    --bg-tertiary: #000000;
+    --border-color: #27272a;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --accent-color: #d946ef;
+    --accent-hover: #c026d3;
+    --accent-gradient: linear-gradient(135deg, #d946ef, #8b5cf6);
+    --scrollbar-track: #09090b;
+    --scrollbar-thumb: #27272a;
+}
+
+[data-theme="frosted"] {
+    --bg-primary: #1e293b;
+    --bg-secondary: rgba(30, 41, 59, 0.7);
+    --bg-tertiary: rgba(15, 23, 42, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent-color: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --backdrop-blur: blur(12px);
+}
+
+[data-theme="sunset"] {
+    --bg-primary: #1c1917;
+    --bg-secondary: #292524;
+    --bg-tertiary: #0c0a09;
+    --border-color: #44403c;
+    --text-primary: #fafaf9;
+    --text-secondary: #a8a29e;
+    --accent-color: #f97316;
+    --accent-hover: #ea580c;
+    --accent-gradient: linear-gradient(to right, #f97316, #db2777);
+    --scrollbar-track: #1c1917;
+    --scrollbar-thumb: #44403c;
+}
