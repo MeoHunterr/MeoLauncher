@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-orange?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-windows-lightgrey?style=for-the-badge)](https://www.microsoft.com/windows)
 
-**MeoLauncher** is a high-performance, modern Minecraft launcher specifically optimized for **Better Than Adventure (BTA v7.3_04)**. Built with a focus on aesthetics, security, and performance.
+**MeoLauncher** is a high-performance, modern Minecraft launcher built with a focus on aesthetics, security, and performance.
 
 ---
 
@@ -24,7 +24,6 @@
 
 ### ⚡ Performance & Security
 - **JVM Optimization**: Pre-configured performance profiles (G1GC, ParallelGC, etc.) to eliminate micro-stutters.
-- **Advanced Anti-Cheat**: Real-time monitoring for unauthorized mods and X-Ray detection.
 - **Resource Efficient**: Lightweight Python backend with a fast `pywebview` frontend.
 
 ---
@@ -104,6 +103,6 @@ If you find this project helpful, consider supporting its development:
 
 ## 📜 Disclaimer
 
-MeoLauncher is not affiliated with Mojang AB or Microsoft. Minecraft is a trademark of Mojang Synergies AB. This launcher is intended for use with the Better Than Adventure modpack.
+MeoLauncher is not affiliated with Mojang AB or Microsoft. Minecraft is a trademark of Mojang Synergies AB.
 
 **Developed with ❤️ by MeoHunterr**
