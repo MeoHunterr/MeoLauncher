@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-2.1.0-39d353?style=for-the-badge)](https://github.com/meohunterr/MeoLauncher)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-orange?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-windows-lightgrey?style=for-the-badge)](https://www.microsoft.com/windows)
 
 **MeoLauncher** is a high-performance, modern Minecraft launcher built with a focus on aesthetics, security, and performance.
