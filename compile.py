@@ -12,11 +12,9 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Ensure we are in the project root so .env can be found
 BASE_DIR = Path(__file__).resolve().parent
 os.chdir(BASE_DIR)
 
-# Load environment variables from .env in the project root
 env_path = BASE_DIR / '.env'
 print(f"Loading .env from: {env_path}")
 if env_path.exists():
@@ -25,7 +23,6 @@ if env_path.exists():
 else:
     print("[!] WARNING: .env file NOT found at expected path.")
 
-# ==== SECURE CLIENT_ID EMBEDDING (AES-128) ====
 import re
 import shutil
 import atexit
@@ -54,7 +51,6 @@ def embed_client_id():
         print(f"[!] ERROR: {_CREDENTIALS_PATH} not found")
         sys.exit(1)
     
-    # Backup original file
     _CREDENTIALS_BACKUP = _CREDENTIALS_PATH + ".backup"
     shutil.copy2(_CREDENTIALS_PATH, _CREDENTIALS_BACKUP)
     atexit.register(restore_credentials_py)
@@ -62,13 +58,11 @@ def embed_client_id():
     with open(_CREDENTIALS_PATH, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Generate Key and Encrypt
     key = Fernet.generate_key()
     fernet = Fernet(key)
     encrypted_id = fernet.encrypt(client_id.encode()).decode()
     key_str = key.decode()
     
-    # Use regex to replace values (works even if not empty)
     new_content = re.sub(
         r'_ENCRYPTED_CLIENT_ID\s*=\s*"[^"]*"',
         f'_ENCRYPTED_CLIENT_ID = "{encrypted_id}"',
@@ -96,7 +90,6 @@ def restore_credentials_py():
         _CREDENTIALS_BACKUP = None
 
 
-# ==== TEMPLATE RENDERING ====
 def render_templates():
     """Render Jinja2 templates to HTML before build."""
     try:
@@ -115,20 +108,11 @@ def render_templates():
         print(f"[!] WARNING: Failed to render templates: {e}")
         print("    Build will proceed with existing index.html")
 
-# Run pre-build tasks
 embed_client_id()
 render_templates()
 
-# Adjust paths to use obfuscated code in 'dist/app'
-# We need to make sure cx_Freeze picks up the obfuscated files
-# The simplest way is to temporarily swap directories or point include_files to dist/app
-# But 'script' in Executable needs to point to the entry point.
-
-# Strategy: Use 'app/webview_app.py' as script
 SCRIPT_PATH = "app/webview_app.py"
 
-
-# App metadata
 APP_NAME = "MeoLauncher"
 APP_VERSION = "2.0.0"
 APP_DESCRIPTION = "MeoLauncher - Minecraft BTA Modpack Launcher"
@@ -148,48 +132,35 @@ def include_files(source_folder, target_folder):
     return files
 
 
-# Files to include in the build
 additional_files = []
 
-# Frontend assets (HTML/CSS/JS) - includes docs folder with .md files
 additional_files += include_files("app/assets", "lib/app/assets/")
 
-# Explicitly ensure docs are included (redundant but safe)
 if os.path.exists("app/assets/docs"):
     print("[*] Including documentation files (.md)")
     additional_files += include_files("app/assets/docs", "lib/app/assets/docs/")
 
-# Game assets (required for playing)
 if os.path.exists("app/game"):
     additional_files += include_files("app/game", "app/game/")
 
-# Java runtime (required for playing)
 if os.path.exists("app/java_pkg"):
     additional_files += include_files("app/java_pkg", "app/java_pkg/")
 
-# Compressed assets (if using tar.xz method)
 if os.path.exists("assets"):
     additional_files += include_files("assets", "assets/")
 
-# Data folder (settings, etc.)
 if os.path.exists("data"):
     additional_files += include_files("data", "data/")
 
-# .env file (for CLIENT_ID)
-# .env file - EXCLUDED for security
-
-
-# Executable configuration
 executables = [
     Executable(
         script=SCRIPT_PATH,
-        base="Win32GUI",  # No console window
+        base="Win32GUI", 
         target_name="MeoLauncher.exe",
         icon="app/assets/icon.ico" if os.path.exists("app/assets/icon.ico") else None
     )
 ]
 
-# Build configuration
 build_options = {
     "packages": [
         "webview",
@@ -213,8 +184,8 @@ build_options = {
         "bottle",
         "ssl",
         "certifi",
-        "cryptography",    # Required for AES
-        "psutil",          # Required for RAM detection
+        "cryptography",  
+        "psutil",          
     ],
     "excludes": [
         "tkinter",
