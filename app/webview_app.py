@@ -389,6 +389,9 @@ class JSApi:
             
             return result
             
+        except ValueError as e:
+            logger.warning("Microsoft login not available: %s", e)
+            return {"status": "error", "message": "Microsoft login not configured. Please use Ely.by or offline mode."}
         except ImportError as e:
             logger.error("Missing module for Microsoft login: %s", e)
             return {"status": "error", "message": f"Missing: {e}. Run: pip install minecraft-launcher-lib"}

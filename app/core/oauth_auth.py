@@ -70,6 +70,8 @@ class MicrosoftAuthOAuth:
         if not MINECRAFT_LIB_AVAILABLE:
             raise ImportError("minecraft_launcher_lib required")
         self.client_id = _get_client_id()
+        if not self.client_id:
+            raise ValueError("Microsoft login not available - CLIENT_ID not configured")
         self.redirect_url = REDIRECT_URL
         self.server = None
     

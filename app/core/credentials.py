@@ -41,7 +41,7 @@ def get_client_id_from_keyring() -> str | None:
         return None
 
 
-def get_client_id() -> str:
+def get_client_id() -> str | None:
     keyring_id = get_client_id_from_keyring()
     if keyring_id:
         return keyring_id
@@ -60,7 +60,7 @@ def get_client_id() -> str:
         except Exception:
             pass
     
-    raise ValueError("CLIENT_ID not found. Set in .env or build with compile.py")
+    return None
 
 
 def clear_stored_credentials():

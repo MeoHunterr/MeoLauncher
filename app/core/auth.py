@@ -12,6 +12,8 @@ class MicrosoftAuth:
     
     def __init__(self):
         self.client_id = get_client_id()
+        if not self.client_id:
+            raise ValueError("Microsoft login not available - CLIENT_ID not configured")
         self.app = msal.PublicClientApplication(client_id=self.client_id, authority=self.AUTHORITY)
         self.session = requests.Session()
 

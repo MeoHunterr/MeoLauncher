@@ -42,10 +42,9 @@ def embed_client_id():
 
     client_id = os.getenv("CLIENT_ID")
     if not client_id:
-        print(f"[!] ERROR: CLIENT_ID not found in .env file!")
-        print(f"[!] Create a .env file with: CLIENT_ID=your-azure-client-id")
-        print(f"[!] Current .env path: {env_path}")
-        sys.exit(1)
+        print(f"[!] WARNING: CLIENT_ID not found in .env file!")
+        print(f"[!] Microsoft login will be disabled. Only Ely.by and offline login available.")
+        return  # Skip embedding, don't fail the build
     
     if not os.path.exists(_CREDENTIALS_PATH):
         print(f"[!] ERROR: {_CREDENTIALS_PATH} not found")
