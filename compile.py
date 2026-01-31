@@ -155,7 +155,7 @@ if os.path.exists("data"):
 executables = [
     Executable(
         script=SCRIPT_PATH,
-        base="Win32GUI", 
+        base="gui", 
         target_name="MeoLauncher.exe",
         icon="app/assets/icon.ico" if os.path.exists("app/assets/icon.ico") else None
     )
@@ -185,7 +185,7 @@ build_options = {
         "ssl",
         "certifi",
         "cryptography",  
-        "psutil",          
+        "psutil",
     ],
     "excludes": [
         "tkinter",

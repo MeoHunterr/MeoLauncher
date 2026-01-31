@@ -525,7 +525,7 @@ def main():
             window.evaluate_js(f"alert('Error: {e}');")
 
     threading.Thread(target=init_sequence, daemon=True).start()
-    webview.start(debug=settings_mgr.get("debug_mode"))
+    webview.start(debug=settings_mgr.get("debug_mode"), gui='edgechromium')
 
 
 if __name__ == '__main__':
